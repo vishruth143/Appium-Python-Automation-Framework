@@ -1,23 +1,18 @@
 ---
-RUN_ON_CLOUD: false  # or true when needed
-CLOUD_PROVIDER: browserstack  # or saucelabs
+RUN_ON_CLOUD : false
+CLOUD_PROVIDER : lambdatest
 
-# BrowserStack
-BROWSERSTACK_USER: <your_browserstack_username>
-BROWSERSTACK_KEY: <your_browserstack_access_key>
+# Lambdatest
+IS_VIRTUAL_DEVICE : true
+LAMBDATEST_USERNAME : <Your user name>
+LAMBDATEST_ACCESS_KEY : <Your access key>
+APP : <Your app id>
 
-# Sauce Labs
-SAUCELABS_USER: <your_saucelabs_username>
-SAUCELABS_KEY: <your_saucelabs_access_key>
-
-# Mobitru
-MOBITRU_BILLING_UNIT: <your_mobitru_billing_unit>
-MOBITRU_KEY: <your_mobitru_access_key>
-
-PLATFORM_NAME: Android
-AUTOMATION_NAME: uiautomator2
-DEVICE_NAME: Pixel 9 Pro XL
-UDID: emulator-5554
-APP_PACKAGE: com.code2lead.kwad
-APP_ACTIVITY: com.code2lead.kwad.MainActivity
-APP_PATH: ./app_apk/Android_Demo_App.apk
+PLATFORM_NAME : Android
+DEVICE_NAME : Pixel 8 Pro
+APPIUM_VERSION : 2.16.2
+PLATFORM_VERSION : 16
+UDID : emulator-5554
+APP_PACKAGE : com.code2lead.kwad
+APP_ACTIVITY : com.code2lead.kwad.MainActivity
+APP_PATH : ./app_apk/Android_Demo_App.apk

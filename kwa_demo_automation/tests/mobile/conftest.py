@@ -20,8 +20,9 @@ def appium_server():
     print('-' * 10 + ' Starting Appium Server ' + '-' * 10)
     appium_service = AppiumService()
     appium_service.start()
-    print("Appium service is running? - " + str(appium_service.is_running))
-    print("Appium service is listening? - " + str(appium_service.is_listening))
+    print(f"Appium service is running? - {appium_service.is_running}")
+    print(f"Appium service is listening? - {appium_service.is_listening}")
+
     if not appium_service.is_running:
         raise RuntimeError("Appium server failed to start.")
 
@@ -29,8 +30,8 @@ def appium_server():
 
     print('-' * 10 + ' Stopping Appium Server ' + '-' * 10)
     appium_service.stop()
-    print("Appium service is running? - " + str(appium_service.is_running))
-    print("Appium service is listening? - " + str(appium_service.is_listening))
+    print(f"Appium service is running? - {appium_service.is_running}")
+    print(f"Appium service is listening? - {appium_service.is_listening}")
 
 @pytest.fixture()
 def driver(request):
@@ -40,34 +41,49 @@ def driver(request):
     cloud_provider = mobile_test_env_config.get("CLOUD_PROVIDER", "").lower()
 
     if run_on_cloud:
-        capabilities = {
-            "platformName": mobile_test_env_config.get("PLATFORM_NAME", "Android"),
-            "deviceName": mobile_test_env_config.get("DEVICE_NAME", "Pixel 9 Pro XL"),
-            "app": mobile_test_env_config.get("APP_URL"),  # uploaded app url from BS/Sauce
-            "automationName": mobile_test_env_config.get("AUTOMATION_NAME", "uiautomator2")
-        }
+        if cloud_provider == "lambdatest":
+            lt_user = mobile_test_env_config.get("LAMBDATEST_USERNAME")
+            lt_key = mobile_test_env_config.get("LAMBDATEST_ACCESS_KEY")
+            is_virtual_device = mobile_test_env_config.get("IS_VIRTUAL_DEVICE", False)
+            app_url = mobile_test_env_config.get("APP")
 
-        if cloud_provider == "browserstack":
-            bs_user = mobile_test_env_config.get("BROWSERSTACK_USER")
-            bs_key = mobile_test_env_config.get("BROWSERSTACK_KEY")
-            remote_url = f"http://{bs_user}:{bs_key}@hub.browserstack.com/wd/hub"
+            remote_url = (
+                f"https://{lt_user}:{lt_key}@"
+                f"{'hub.lambdatest.com/wd/hub' if is_virtual_device else 'mobile-hub.lambdatest.com/wd/hub'}"
+            )
 
-        elif cloud_provider == "saucelabs":
-            sauce_user = mobile_test_env_config.get("SAUCELABS_USER")
-            sauce_key = mobile_test_env_config.get("SAUCELABS_KEY")
-            remote_url = f"https://{sauce_user}:{sauce_key}@ondemand.saucelabs.com:443/wd/hub"
+            options = UiAutomator2Options()
+            options.platform_name = mobile_test_env_config.get("PLATFORM_NAME", "Android")
+            options.device_name = mobile_test_env_config.get("DEVICE_NAME", "Pixel 8 Pro")
+            options.platform_version = mobile_test_env_config.get("PLATFORM_VERSION", "16")
+            options.appium_version = mobile_test_env_config.get("APPIUM_VERSION", "2.16.2")
+            options.app = app_url
+            options.automation_name = "UiAutomator2"
 
-        elif cloud_provider == "mobitru":
-            mobitru_billing_unit = mobile_test_env_config.get("MOBITRU_BILLING_UNIT")
-            mobitru_key = mobile_test_env_config.get("MOBITRU_KEY")
-            remote_url = f"https://{mobitru_billing_unit}:{mobitru_key}@app.mobitru.com/wd/hub"
+            lt_options = {
+                "platformName": "Android",
+                "appium:deviceName": "Pixel 8 Pro",
+                "appium:appiumVersion": "2.1.3",
+                "appium:platformVersion": "16",
+                "app": app_url,
+                "appium:devicelog": "true",
+                "appium:visual": "true",
+                "appium:network": "true",
+                "appium:video": "true",
+                "appium:build": "Appium Mobile Automation",
+                "appium:name": "test_kwa_demo",
+                "appium:project": "KWA Demo",
+                "appium:deviceOrientation": "portrait"
+            }
+            options.set_capability("LT:Options", lt_options)
 
         else:
             raise ValueError(f"Unsupported cloud provider: {cloud_provider}")
 
-        driver_instance = webdriver.Remote(remote_url, capabilities)
+        driver_instance = webdriver.Remote(remote_url, options=options)
+
     else:
-        launch_emulator()  # ← Launch emulator before driver initialization
+        launch_emulator()  # Ensure emulator is running before driver init
 
         options = UiAutomator2Options()
         options.platform_name = mobile_test_env_config.get("PLATFORM_NAME", "Android")
@@ -77,7 +93,6 @@ def driver(request):
         options.app_package = mobile_test_env_config.get("APP_PACKAGE", "com.code2lead.kwad")
         options.app_activity = mobile_test_env_config.get("APP_ACTIVITY", "com.code2lead.kwad.MainActivity")
 
-        # Resolve APK path
         apk_relative_path = mobile_test_env_config.get("APP_PATH", "app_apk/Android_Demo_App.apk")
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
         apk_absolute_path = os.path.abspath(os.path.join(base_dir, apk_relative_path))
@@ -86,6 +101,7 @@ def driver(request):
             raise FileNotFoundError(f"APK file not found at path: {apk_absolute_path}")
 
         options.app = apk_absolute_path
+
         driver_instance = webdriver.Remote("http://127.0.0.1:4723", options=options)
 
     driver_instance = EventFiringWebDriver(driver_instance, MyEventListener())
