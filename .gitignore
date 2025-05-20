@@ -1,0 +1,12 @@
+.idea
+__pycache__
+.pytest_cache
+.venv
+.DS_Store
+kwa_demo_automation/framework/logs
+kwa_demo_automation/tests/__pycache__
+kwa_demo_automation/tests/pytest_cache
+screenshots
+reports
+allure-results
+allure-report
