@@ -49,7 +49,7 @@ def driver(request):
 
             remote_url = (
                 f"https://{lt_user}:{lt_key}@"
-                f"{'hub.lambdatest.com/wd/hub' if is_virtual_device else 'mobile-hub.lambdatest.com/wd/hub'}"
+                f"{'hub.lambdatest.com/wd/hub' if is_virtual_device else 'android-hub.lambdatest.com/wd/hub'}"
             )
 
             options = UiAutomator2Options()
