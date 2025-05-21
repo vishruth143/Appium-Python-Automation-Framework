@@ -6,7 +6,7 @@ from kwa_demo_automation.framework.utilities.loaders import load_json, load_yaml
 
 class ConfigParser:
     CONFIG_FILE_PATHS = {
-        'common_config': 'common_config.yaml',
+        'common_config': 'common_config.yml',
         'mobile_test_env_config': 'mobile/mobile_test_env_config.yaml',
         'mobile_test_data_config': 'mobile/mobile_test_data_config.yaml',
         'mobile_test_excel_data_config': 'mobile/mobile_test_excel_data_config.xlsx',
